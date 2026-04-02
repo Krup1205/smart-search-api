@@ -88,7 +88,13 @@ def smart_search(request: SearchRequest):
 
             # Property Type (STRICT)
             if filters.get("propertyType"):
-                if item.get("propertyType", "").lower() != filters["propertyType"].lower():
+                item_type = item.get("propertyType", "")
+
+                # Normalize to lowercase for safe comparison
+                item_type = item_type.lower()
+                filter_types = [t.lower() for t in filters["propertyType"]]
+
+                if item_type not in filter_types:
                     strict_fail = True
                 else:
                     score += 2

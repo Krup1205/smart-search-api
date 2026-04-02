@@ -1,4 +1,5 @@
 import re
+from unittest import result
 
 def parse_query(query, areas_list, cities_list):
     query = query.lower()
@@ -6,17 +7,21 @@ def parse_query(query, areas_list, cities_list):
     result = {}
 
     # 🏠 Property Type
-    property_map = {
-        "hostel": "Hostel",
-        "pg": "PG",
-        "flat": "Flat",
-        "apartment": "Flat"
-    }
+    property_map = [
+        ("hostel", "Hostel"),
+        ("pg", "PG"),
+        ("flat", "Flat"),
+        ("apartment", "Flat")
+    ]
 
-    for key, value in property_map.items():
+    types = []
+
+    for key, value in property_map:
         if key in query:
-            result["propertyType"] = value
-            break
+            types.append(value)
+
+    if types:
+        result["propertyType"] = list(set(types))  # remove duplicates
 
     # 👩 Gender
     if any(word in query for word in ["girls", "female", "ladies"]):
