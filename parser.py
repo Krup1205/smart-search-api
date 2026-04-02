@@ -10,6 +10,8 @@ def parse_query(query, areas_list, cities_list):
         result["propertyType"] = "PG"
     elif "flat" in query or "apartment" in query:
         result["propertyType"] = "Flat"
+    elif "hostel" in query:
+        result["propertyType"] = "Hostel"
 
     # 👩 Gender
     if any(word in query for word in ["girls", "female", "ladies"]):
