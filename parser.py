@@ -1,4 +1,5 @@
 import re
+import types
 from unittest import result
 
 def parse_query(query, areas_list, cities_list):
@@ -7,21 +8,21 @@ def parse_query(query, areas_list, cities_list):
     result = {}
 
     # 🏠 Property Type
+   
     property_map = [
         ("hostel", "Hostel"),
         ("pg", "PG"),
         ("flat", "Flat"),
         ("apartment", "Flat")
     ]
-
+    words = re.findall(r'\b\w+\b', query)  # split into words
     types = []
-
     for key, value in property_map:
-        if key in query:
+        if key in words:
             types.append(value)
 
     if types:
-        result["propertyType"] = list(set(types))  # remove duplicates
+        result["propertyType"] = list(set(types))
 
     # 👩 Gender
     if any(word in query for word in ["girls", "female", "ladies"]):
