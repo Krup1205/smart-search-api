@@ -3,10 +3,20 @@ import requests
 from parser import parse_query
 from pydantic import BaseModel
 from rapidfuzz import fuzz
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
 DATA_API_URL = "https://getallproperties-kdezv7i5fa-uc.a.run.app/"
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class SearchRequest(BaseModel):
     query: str
