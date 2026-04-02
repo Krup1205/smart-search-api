@@ -44,8 +44,10 @@ def parse_query(query, areas_list, cities_list):
 
     # 🌆 Dynamic City Match (improved)
     for city in cities_list:
-        if city in query:
-            result["city"] = city
+        city_clean = city.split(",")[0].strip()  # take only "pune"
+
+        if city_clean in query:
+            result["city"] = city_clean
             break
 
     return result
