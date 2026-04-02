@@ -6,12 +6,17 @@ def parse_query(query, areas_list, cities_list):
     result = {}
 
     # 🏠 Property Type
-    if "pg" in query:
-        result["propertyType"] = "PG"
-    elif "flat" in query or "apartment" in query:
-        result["propertyType"] = "Flat"
-    elif "hostel" in query:
-        result["propertyType"] = "Hostel"
+    property_map = {
+        "hostel": "Hostel",
+        "pg": "PG",
+        "flat": "Flat",
+        "apartment": "Flat"
+    }
+
+    for key, value in property_map.items():
+        if key in query:
+            result["propertyType"] = value
+            break
 
     # 👩 Gender
     if any(word in query for word in ["girls", "female", "ladies"]):
