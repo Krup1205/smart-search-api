@@ -80,49 +80,63 @@ def smart_search(request: SearchRequest):
         # Parse query
         filters = parse_query(query, areas, cities)
 
-        # 🔥 Smart ranking logic
         results = []
 
         for item in data:
             score = 0
+            strict_fail = False
 
-            # Property Type
+            # Property Type (STRICT)
             if filters.get("propertyType"):
-                if item.get("propertyType", "").lower() == filters["propertyType"].lower():
+                if item.get("propertyType", "").lower() != filters["propertyType"].lower():
+                    strict_fail = True
+                else:
                     score += 2
 
-            # Gender
+            # Gender (STRICT)
             if filters.get("GenderType"):
-                if item.get("GenderType", "").lower() == filters["GenderType"].lower():
+                if item.get("GenderType", "").lower() != filters["GenderType"].lower():
+                    strict_fail = True
+                else:
                     score += 2
 
-            # Tenant Type
+            # Tenant Type (STRICT)
             if filters.get("TenantType"):
-                if item.get("TenantType", "").lower() == filters["TenantType"].lower():
+                if item.get("TenantType", "").lower() != filters["TenantType"].lower():
+                    strict_fail = True
+                else:
                     score += 1
 
-            # Area
+            # Area (STRICT + FUZZY)
             if filters.get("area"):
                 item_area = item.get("area", "").lower()
                 similarity = fuzz.partial_ratio(filters["area"], item_area)
 
-                if similarity > 70:
+                if similarity < 70:
+                    strict_fail = True
+                else:
                     score += 3
 
-            # City
+            # City (STRICT + FUZZY)
             if filters.get("city"):
                 item_city = item.get("city", "").lower()
                 similarity = fuzz.partial_ratio(filters["city"], item_city)
 
-                if similarity > 70:
+                if similarity < 70:
+                    strict_fail = True
+                else:
                     score += 2
 
-            # Price
+            # If strict condition fails → skip item
+            if strict_fail:
+                continue
+
+            # Price (SOFT)
             if filters.get("max_price"):
                 if item.get("price", 0) <= filters["max_price"]:
                     score += 2
 
-            # Facilities
+            # Facilities (SOFT)
             if filters.get("facilities"):
                 item_facilities = [f.lower() for f in item.get("facilities", [])]
                 matches = sum(
@@ -130,24 +144,22 @@ def smart_search(request: SearchRequest):
                 )
                 score += matches
 
-            # Add if relevant
-            if score > 0:
-                item["score"] = score
-                results.append(item)
+            results.append({**item, "score": score})
 
-        # Sort results
+        # Sort best results
         results = sorted(results, key=lambda x: x["score"], reverse=True)
 
         return {
             "query": query,
             "filters": filters,
             "count": len(results),
-            "results": results[:20]  # limit results
+            "results": results[:20]
         }
 
     except Exception as e:
         return {"error": str(e)}
-    
+
+
 @app.get("/suggestions")
 def get_suggestions(q: str):
     try:
